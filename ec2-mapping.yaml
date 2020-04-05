@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Map AMI Id based on Region
+Parameters: 
+  DevKeyName:
+    Description: Select key name from list
+    Type: AWS::EC2::KeyPair::KeyName
+
+  EnvironmentName:
+    Description: Select environmrnt
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+ 
+Mappings: 
+  RegionMap:
+    us-east-2:
+      HVM64: ami-0d542ef84ec55d71c
+    us-west-1:
+      HVM64: ami-04bc3da8f14823e88
+
+  EnvironmentMap:
+    dev:
+      instanceType: t2.micro
+    prod:
+      instanceType: t2.small
+
+Resources:
+  DevEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      KeyName: !Ref DevKeyName 
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - HVM64
+      InstanceType: !FindInMap
+        - EnvironmentMap
+        - !Ref EnvironmentName
+        - instanceType
+      SecurityGroupIds:
+        - default
+      
+
+
